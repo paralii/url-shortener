@@ -1,12 +1,8 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import { PORT } from './utils/constants.js';
-dotenv.config();
+import app from './src/app.js';
+import connectDB from './src/config/database.js';
+import { PORT } from './src/utils/constants.js';
+import logger from './src/utils/logger.js';
 
-const app = express();
+connectDB();
 
-app.get('/', (req, res) => {
-    res.send('HELLO WORLD')
-});
-
-app.listen(PORT, ()=> console.log('server started'));
+app.listen(PORT, () => logger.info(`Server started on port ${PORT}`));

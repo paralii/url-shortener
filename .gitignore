@@ -31,3 +31,5 @@ dist/
 build/
 .idea/
 .vscode/
+
+tree.txt
