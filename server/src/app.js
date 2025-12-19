@@ -7,7 +7,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from "express-mongo-sanitize";
 import xss from "xss-clean";
-
+import routes from './routes/url.routes.js';
 
 dotenv.config();
 
@@ -18,7 +18,6 @@ const apiLimiter = rateLimit({
   message: "Too many requests, try again later.",
 });
 
-app.use("/api", apiLimiter);
 app.use(cors({
     origin : process.env.CLIENT_URL,
     credentials : true
@@ -36,10 +35,9 @@ if(process.env.NODE_ENV === "production"){
 
 app.use(helmet());
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({extended: true}));
 
-app.get('/', (req, res) => {
-    res.send('HELLO WORLD')
-});
+app.use("/api", apiLimiter);
+app.use('/api', routes);
 
 export default app;
