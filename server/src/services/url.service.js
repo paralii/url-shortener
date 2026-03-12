@@ -1,13 +1,16 @@
-import Url from "../models/urlModel";
+import Url from "../models/urlModel.js";
 import { nanoid } from "nanoid";
-import { MAX_RETRIES } from "../utils/constants";
+import { MAX_RETRIES } from "../utils/constants.js";
+import normalizeUrl from "../utils/urlNormalizer.js";
 
 async function generateUniqueId(){
     return nanoid(8);
 };
 
 export const createShortUrl = async(originalUrl) => {
-    const url = await Url.findOne({originalUrl: originalUrl})
+
+    const normalizedUrl = normalizeUrl(originalUrl);
+    const url = await Url.findOne({originalUrl: normalizedUrl})
 
     if(url){
         return url;
@@ -18,7 +21,7 @@ export const createShortUrl = async(originalUrl) => {
             try {
                 const shortId = await generateUniqueId();
                 return await Url.create({
-                    originalUrl,
+                    originalUrl: normalizedUrl,
                     shortId: shortId,
                 });
 
@@ -28,7 +31,7 @@ export const createShortUrl = async(originalUrl) => {
         }        
     }
 
-    throw new Error("Could not generate a unique short URL after multiple attempts");
+    throw new Error("URL generation is failed after max retries");
 };
 
 export const resolveShortUrl = async(shortId) => {
