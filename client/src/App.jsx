@@ -15,7 +15,7 @@ export default function App() {
     <div className="flex flex-col min-h-screen">
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-50 border-b border-border bg-bg/85 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-border backdrop-blur-md" style={{ backgroundColor: 'rgba(6, 6, 14, 0.85)' }}>
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <span
             className="font-display text-[1.8rem] tracking-[0.08em] text-accent leading-none select-none"
