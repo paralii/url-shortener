@@ -13,7 +13,7 @@ export const createShortUrl = async(originalUrl, expiresIn = null) => {
     const url = await Url.findOne({originalUrl: normalizedUrl})
 
     if(url){
-        return url;
+        return { url: url, created: false};
     } else {
     
         const expiresAt = expiresIn ? new Date(Date.now() + expiresIn * 1000) : null ;
@@ -21,12 +21,12 @@ export const createShortUrl = async(originalUrl, expiresIn = null) => {
             
             try {
                 const shortId = await generateUniqueId();
-                return await Url.create({
+                const url = await Url.create({
                     originalUrl: normalizedUrl,
                     shortId: shortId,
                     expiresAt: expiresAt
                 });
-
+                return { url, created: true };
             } catch (error) {
                 if (error.code !== 11000) throw error;
             }
