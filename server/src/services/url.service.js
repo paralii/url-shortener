@@ -7,7 +7,7 @@ async function generateUniqueId(){
     return nanoid(8);
 };
 
-export const createShortUrl = async(originalUrl) => {
+export const createShortUrl = async(originalUrl, expiresIn = null) => {
 
     const normalizedUrl = normalizeUrl(originalUrl);
     const url = await Url.findOne({originalUrl: normalizedUrl})
@@ -16,6 +16,7 @@ export const createShortUrl = async(originalUrl) => {
         return url;
     } else {
     
+        const expiresAt = expiresIn ? new Date(Date.now() + expiresIn * 1000) : null ;
         for( let attempt = 1; attempt <= MAX_RETRIES; attempt++){
             
             try {
@@ -23,6 +24,7 @@ export const createShortUrl = async(originalUrl) => {
                 return await Url.create({
                     originalUrl: normalizedUrl,
                     shortId: shortId,
+                    expiresAt: expiresAt
                 });
 
             } catch (error) {
@@ -37,7 +39,11 @@ export const createShortUrl = async(originalUrl) => {
 export const resolveShortUrl = async(shortId) => {
     const url = await Url.findOneAndUpdate({
         shortId, 
-        isActive: true
+        isActive: true,
+        $or: [
+            { expiresAt: null },
+            { expiresAt: { $gt: new Date() } }
+        ]
     },{
         $inc:{clicks: 1 }
     },{
