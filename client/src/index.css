@@ -1,71 +1,83 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-:root {
-  --bg:            #06060e;
-  --surface:       #0b0b18;
-  --surface-2:     #10101f;
-  --border:        #18182e;
-  --border-hi:     #26264a;
-  --accent:        #f97316;
-  --accent-dim:    rgba(249, 115, 22, 0.10);
-  --accent-glow:   rgba(249, 115, 22, 0.25);
-  --text:          #dde1ec;
-  --text-dim:      #5a607a;
-  --text-subtle:   #8892aa;
-  --error:         #f87171;
-  --error-dim:     rgba(248, 113, 113, 0.10);
-  --success:       #34d399;
-  --success-dim:   rgba(52, 211, 153, 0.10);
+/* ── Design tokens — available as Tailwind utilities ── */
+@theme {
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+  --font-sans:    'DM Sans', sans-serif;
 
-  --font-display:  'Bebas Neue', sans-serif;
-  --font-body:     'DM Sans', sans-serif;
-  --font-mono:     'DM Mono', monospace;
-
-  --radius:        4px;
-  --transition:    180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --color-bg:           #06060e;
+  --color-surface:      #0b0b18;
+  --color-surface-2:    #10101f;
+  --color-border:       #18182e;
+  --color-border-hi:    #26264a;
+  --color-accent:       #f97316;
+  --color-accent-dim:   rgba(249,115,22,0.10);
+  --color-accent-glow:  rgba(249,115,22,0.25);
+  --color-ink:          #dde1ec;
+  --color-ink-dim:      #5a607a;
+  --color-ink-subtle:   #8892aa;
+  --color-danger:       #f87171;
+  --color-danger-dim:   rgba(248,113,113,0.10);
+  --color-ok:           #34d399;
+  --color-ok-dim:       rgba(52,211,153,0.10);
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ── Base ────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    /* Subtle grid lines */
+    background-image:
+      linear-gradient(var(--color-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Vignette over grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 70% at 50% 40%, transparent 30%, var(--color-bg) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  input, button, textarea { font-family: inherit; }
+  a { color: var(--color-accent); text-decoration: none; }
 }
 
-html { font-size: 16px; }
-
-body {
-  font-family: var(--font-body);
-  background-color: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 40px 40px;
-  background-position: center center;
+/* ── Keyframes ───────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Fade the grid toward center */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(ellipse 80% 70% at 50% 40%, transparent 30%, var(--bg) 100%);
-  pointer-events: none;
-  z-index: 0;
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; }
+  to   { opacity: 1; max-height: 200px; }
 }
 
-#root {
-  position: relative;
-  z-index: 1;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-input, button, textarea {
-  font-family: inherit;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
+/* ── Reusable animation utilities ────────────────────── */
+@layer utilities {
+  .animate-fade-up   { animation: fadeUp   0.35s ease both; }
+  .animate-slide-down{ animation: slideDown 0.22s ease both; }
+  .animate-spin-fast { animation: spin     0.6s linear infinite; }
 }
