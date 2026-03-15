@@ -57,3 +57,21 @@ export const resolveShortUrl = async(shortId) => {
 
     return url;
 };
+
+export const getUrlStats = async(shortId) => {
+    const url = await Url.findOne({ shortId }).select(
+        'shortId originalUrl clicks isActive expiresAt createdAt'
+    );
+
+    if (!url) return null;
+
+    return {
+        shortId: url.shortId,
+        originalUrl: url.originalUrl,
+        clicks: url.clicks,
+        isActive: url.isActive,
+        expiresAt: url.expiresAt,
+        createdAt: url.createdAt,
+        isExpired: url.expiresAt ? url.expiresAt < new Date() : false,
+    };
+};
