@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './index.css';
+import './App.css';
+import ShortenForm from './components/ShortenForm';
+import StatsLookup from './components/StatsLookup';
 
-function App() {
-  const [count, setCount] = useState(0)
+const TABS = [
+  { id: 'shorten', label: 'Shorten' },
+  { id: 'stats',   label: 'Stats'   },
+];
+
+export default function App() {
+  const [tab, setTab] = useState('shorten');
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="app">
+      {/* ── Header ── */}
+      <header className="header">
+        <div className="header-inner">
+          <span className="logo">SHR<span>.</span>T</span>
+          <nav className="nav">
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                className={`nav-btn${tab === t.id ? ' active' : ''}`}
+                onClick={() => setTab(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </header>
 
-export default App
+      {/* ── Main ── */}
+      <main className="app-main">
+        <div className="hero">
+          <h1 className="hero-title">
+            Long URLs,<br /><span className="accent">cut short.</span>
+          </h1>
+          <p className="hero-sub">
+            Fast, clean link shortening with click tracking and expiry control.
+          </p>
+        </div>
+
+        {tab === 'shorten' && <ShortenForm />}
+        {tab === 'stats'   && <StatsLookup />}
+      </main>
+    </div>
+  );
+}
