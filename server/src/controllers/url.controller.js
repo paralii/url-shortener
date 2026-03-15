@@ -8,9 +8,9 @@ export const createShortUrlController = async ( req, res, next ) => {
             return res.status(400).json({ message: "originalUrl is required" });
         }
 
-        const url = await createShortUrl(originalUrl, expiresIn);
+        const { url, created } = await createShortUrl(originalUrl, expiresIn);
 
-        res.status(201).json({
+        res.status(created ? 201 : 200).json({
             originalUrl: url.originalUrl,
             shortId: url.shortId,
             expiresAt: url.expiresAt
