@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import mongoSanitize from "express-mongo-sanitize";
 import xss from "xss-clean";
 import routes from './routes/url.routes.js';
+import { errorHandler } from './middlewares/errorHandlers.js';
 
 dotenv.config();
 
@@ -39,5 +40,7 @@ app.use(express.urlencoded({extended: true}));
 
 app.use("/api", apiLimiter);
 app.use('/api', routes);
+
+app.use(errorHandler);
 
 export default app;
