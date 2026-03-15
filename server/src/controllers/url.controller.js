@@ -24,6 +24,10 @@ export const resolveShortUrlController = async ( req, res, next ) => {
     try {
         const { shortId } = req.params;
 
+        if (!/^[a-zA-Z0-9_-]{8}$/.test(shortId)) {
+            return res.status(400).json({ message: 'Invalid short URL' });
+        }
+        
         const url = await resolveShortUrl(shortId);
 
         if (!url) {
