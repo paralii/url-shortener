@@ -10,7 +10,10 @@ async function generateUniqueId(){
 export const createShortUrl = async(originalUrl, expiresIn = null) => {
 
     const normalizedUrl = normalizeUrl(originalUrl);
-    const url = await Url.findOne({originalUrl: normalizedUrl})
+    const url = await Url.findOne({originalUrl: normalizedUrl, $or: [
+        { expiresAt: null },
+        { expiresAt: { $gt: new Date() } }
+    ]})
 
     if(url){
         return { url: url, created: false};
