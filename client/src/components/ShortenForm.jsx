@@ -12,11 +12,14 @@ function isValidUrl(str) {
     }
 }
 
-function expiryToSeconds(dateStr) {
-    if (!dateStr) return null;
-    const diff = new Date(dateStr).getTime() - Date.now();
-    return diff > 0 ? Math.floor(diff / 1000) : null;
-}
+// Preset durations — value is seconds, null = never expires
+const EXPIRY_PRESETS = [
+    { label: 'Never',   value: null },
+    { label: '1 hour',  value: 60 * 60 },
+    { label: '24 hrs',  value: 60 * 60 * 24 },
+    { label: '7 days',  value: 60 * 60 * 24 * 7 },
+    { label: '30 days', value: 60 * 60 * 24 * 30 },
+];
 
 const inputCls = [
     'w-full bg-bg border rounded px-3.5 py-2.5',
@@ -26,22 +29,17 @@ const inputCls = [
     'focus:shadow-[0_0_0_3px_var(--color-accent-glow)]',
 ].join(' ');
 
-const inputErrCls = inputCls + [
-    ' !border-danger',
-    ' !shadow-[0_0_0_3px_var(--color-danger-dim)]',
-].join('');
+const inputErrCls = inputCls + ' !border-danger !shadow-[0_0_0_3px_var(--color-danger-dim)]';
 
 export default function ShortenForm() {
-    const [url, setUrl]         = useState('');
-    const [expiry, setExpiry]   = useState('');
-    const [showAdv, setShowAdv] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError]     = useState('');
-    const [result, setResult]   = useState(null);
-    const [touched, setTouched] = useState(false);
+    const [url, setUrl]             = useState('');
+    const [expiryIdx, setExpiryIdx] = useState(0); // default: Never
+    const [loading, setLoading]     = useState(false);
+    const [error, setError]         = useState('');
+    const [result, setResult]       = useState(null);
+    const [touched, setTouched]     = useState(false);
 
     const urlError = touched && url && !isValidUrl(url) ? 'Enter a valid URL' : '';
-    const minDate  = new Date(Date.now() + 60_000).toISOString().slice(0, 16);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -53,13 +51,12 @@ export default function ShortenForm() {
         setResult(null);
 
         try {
-            const expiresIn = expiryToSeconds(expiry);
+            const expiresIn = EXPIRY_PRESETS[expiryIdx].value; // seconds or null
             const data = await shortenUrl(url, expiresIn);
             setResult(data);
             setUrl('');
-            setExpiry('');
+            setExpiryIdx(0);
             setTouched(false);
-            setShowAdv(false);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -69,7 +66,6 @@ export default function ShortenForm() {
 
     return (
         <>
-            {/* ── Card ── */}
             <div className="w-full max-w-[640px] bg-surface border border-border rounded p-8 animate-fade-up">
                 <p className="font-display text-[1.5rem] tracking-[0.06em] text-ink mb-1">
                     Shorten a URL
@@ -80,7 +76,7 @@ export default function ShortenForm() {
 
                 <form onSubmit={handleSubmit} noValidate>
                     {/* URL field */}
-                    <div className="flex flex-col gap-1.5 mb-4">
+                    <div className="flex flex-col gap-1.5 mb-5">
                         <label
                             htmlFor="url-input"
                             className="text-[0.72rem] font-medium tracking-[0.1em] uppercase text-ink-dim"
@@ -98,55 +94,40 @@ export default function ShortenForm() {
                             autoComplete="off"
                             spellCheck={false}
                         />
-                        <span className="text-[0.73rem] text-danger min-h-[16px]">
-                            {urlError}
-                        </span>
+                        <span className="text-[0.73rem] text-danger min-h-[16px]">{urlError}</span>
                     </div>
 
-                    {/* Advanced toggle */}
-                    <button
-                        type="button"
-                        onClick={() => setShowAdv(v => !v)}
-                        className="flex items-center gap-2 mb-4 cursor-pointer group"
-                    >
-                        <span className={`text-[0.65rem] text-ink-dim transition-transform duration-[180ms] ${showAdv ? 'rotate-90' : ''}`}>
-                            ▶
+                    {/* Expiry presets */}
+                    <div className="flex flex-col gap-2 mb-6">
+                        <span className="text-[0.72rem] font-medium tracking-[0.1em] uppercase text-ink-dim">
+                            Link expires in
                         </span>
-                        <span className="text-[0.75rem] tracking-[0.06em] uppercase text-ink-subtle group-hover:text-ink transition-colors">
-                            Advanced options
-                        </span>
-                    </button>
-
-                    {showAdv && (
-                        <div className="overflow-hidden animate-slide-down mb-4">
-                            <div className="flex flex-col gap-1.5">
-                                <label
-                                    htmlFor="expiry-input"
-                                    className="text-[0.72rem] font-medium tracking-[0.1em] uppercase text-ink-dim"
+                        <div className="flex gap-2 flex-wrap">
+                            {EXPIRY_PRESETS.map((p, i) => (
+                                <button
+                                    key={p.label}
+                                    type="button"
+                                    onClick={() => setExpiryIdx(i)}
+                                    className={[
+                                        'px-3.5 py-1.5 rounded border text-[0.75rem] font-medium',
+                                        'tracking-[0.04em] transition-all duration-[180ms] cursor-pointer',
+                                        expiryIdx === i
+                                            ? 'bg-accent-dim border-accent text-accent'
+                                            : 'bg-bg border-border-hi text-ink-dim hover:border-accent hover:text-accent',
+                                    ].join(' ')}
                                 >
-                                    Expires at
-                                </label>
-                                <input
-                                    id="expiry-input"
-                                    type="datetime-local"
-                                    className={inputCls}
-                                    value={expiry}
-                                    min={minDate}
-                                    onChange={e => setExpiry(e.target.value)}
-                                />
-                                <span className="text-[0.73rem] text-ink-dim min-h-[16px]">
-                                    Leave blank for a permanent link
-                                </span>
-                            </div>
+                                    {p.label}
+                                </button>
+                            ))}
                         </div>
-                    )}
+                    </div>
 
                     {/* Submit */}
                     <button
                         type="submit"
                         disabled={loading}
                         className={[
-                            'w-full mt-2 py-3 px-6 rounded font-semibold text-[0.82rem]',
+                            'w-full py-3 px-6 rounded font-semibold text-[0.82rem]',
                             'tracking-[0.08em] uppercase bg-accent text-black',
                             'flex items-center justify-center gap-2 cursor-pointer',
                             'transition-all duration-[180ms]',
